@@ -1,13 +1,15 @@
 # Hillcrest Suites API
 
-A comprehensive Laravel-based REST API for hotel management system featuring room booking, payment processing, user management, and administrative controls.
+A comprehensive Laravel-based REST API for hotel management system featuring room booking, payment recording, user management, and administrative controls.
+
+Site URL: https://api-helcris.pcds.edu.ph/
 
 ## Features
 
 ### 🏨 Core Functionality
 - **Room Management**: Create, update, and manage hotel rooms with availability tracking
 - **Booking System**: Complete reservation system with date validation and conflict detection
-- **Payment Processing**: Multi-method payment handling with transaction tracking
+- **Payment Recording**: Multi-method payment handling with transaction tracking
 - **User Management**: Role-based access control (Admin/Guest)
 - **Real-time Availability**: Dynamic room availability checking with calendar integration
 - **Activity Logging**: Comprehensive audit trail for all system activities
@@ -247,7 +249,7 @@ The API implements sophisticated availability checking:
 - **Calendar Integration**: Monthly availability calendar generation
 - **Conflict Resolution**: Identifies and reports booking conflicts
 
-### Payment Processing
+### Payment Recording
 - **Multi-Method Support**: Cash, credit card, bank transfer, mobile payments
 - **Partial Payments**: Supports installment payments
 - **Payment Tracking**: Complete audit trail with void capabilities
