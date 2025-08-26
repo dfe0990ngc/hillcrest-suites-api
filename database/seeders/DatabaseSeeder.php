@@ -24,11 +24,13 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $defaultPassword = env('DEFAULT_PASSWORD');
+
         User::updateOrInsert([
             'email' => 'hillcrest-suites@pcds.edu.ph',
         ],[
             'name' => 'HillCrest Admin',
-            'password' => bcrypt('#passwordN1234'),
+            'password' => bcrypt($defaultPassword),
             'email_verified_at' => Carbon::now(),
             'role' => 'admin',
             'phone' => '(082)553 1662',
@@ -38,7 +40,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'neslie@gmail.com',
         // ],[
         //     'name' => 'Neslie Cañete',
-        //     'password' => bcrypt('#passwordN1234'),
+        //     'password' => bcrypt($defaultPassword),
         //     'email_verified_at' => Carbon::now(),
         //     'role' => 'guest',
         //     'phone' => '+639858147644',
@@ -51,7 +53,7 @@ class DatabaseSeeder extends Seeder
         //         'email' => fake()->email(),
         //     ],[
         //         'name' => fake()->name(['male','female'][rand(0,1)]),
-        //         'password' => bcrypt('#passwordN1234'),
+        //         'password' => bcrypt($defaultPassword),
         //         'email_verified_at' => Carbon::now(),
         //         'role' => 'guest',
         //         'phone' => fake()->phoneNumber(),
@@ -77,12 +79,12 @@ class DatabaseSeeder extends Seeder
             'password_policy' => 'basic',
             'bcc_emails' => 'digospcds@pcds.edu.ph',
             'smtp' => json_encode([
-                'MAIL_HOST' => 'mail.pcds.edu.ph',
-                'MAIL_PORT' => 465,
-                'MAIL_USERNAME' => 'info@pcds.edu.ph',
-                'MAIL_PASSWORD' => '.vIK89XDU=PA#]4x',
-                'MAIL_FROM_ADDRESS' => 'no-reply@pcds.edu.ph',
-                'MAIL_FROM_NAME' => 'HILLCREST SUITES',
+                'MAIL_HOST' => env('DEFAULT_MAIL_HOST'),
+                'MAIL_PORT' => env('DEFAULT_MAIL_PORT'),
+                'MAIL_USERNAME' => env('DEFAULT_MAIL_USERNAME'),
+                'MAIL_PASSWORD' => env('DEFAULT_MAIL_PASSWORD'),
+                'MAIL_FROM_ADDRESS' => env('DEFAULT_MAIL_FROM_ADDRESS'),
+                'MAIL_FROM_NAME' => env('DEFAULT_MAIL_FROM_NAME'),
             ]),
         ]);
 
