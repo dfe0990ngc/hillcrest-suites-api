@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
+use stdClass;
 use App\Models\User;
 use App\Helpers\Util;
 use App\Models\Setting;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Notifications\PasswordReset;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use stdClass;
 
 class AuthController extends Controller
 {
@@ -42,7 +43,11 @@ class AuthController extends Controller
             'role' => 'guest',
         ]);
         
-        $user->notify(new VerifyEmail());
+        try{
+            $user->notify(new VerifyEmail());
+        }catch(\Exception $ei){
+            Log::debug('Sending Email Verification Error',[$ei->getMessage()]);
+        }
 
         return response()->json(['message' => 'Successfully registered!']);
     }
@@ -99,7 +104,11 @@ class AuthController extends Controller
 
         $user = User::where('email',$request->input('email'))->first();
         
-        $user->notify(new VerifyEmail());
+        try{
+            $user->notify(new VerifyEmail());
+        }catch(\Exception $ei){
+            Log::debug('Sending Email Verification Error',[$ei->getMessage()]);
+        }
 
         return response()->json(['message' => 'Email Verification has been sent successfully.']);
     }
@@ -137,7 +146,11 @@ class AuthController extends Controller
         $user->reset_password_valid_until = $validAt;
         $user->save();
         
-        $user->notify(new PasswordReset($url));
+        try{
+            $user->notify(new PasswordReset($url));
+        }catch(\Exception $ei){
+            Log::debug('Sending Password Reset Link Error',[$ei->getMessage()]);
+        }
 
         return response()->json(['message' => 'Password Reset link has been sent successfully.']);
     }

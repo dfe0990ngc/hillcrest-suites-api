@@ -42,13 +42,17 @@ class StorePaymentRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     if ($this->booking_code) {
                         $booking = Booking::where('code', $this->booking_code)->first();
-                        
-                        $setting = Setting::first();
+
                         if ($booking) {
-                            $totalPaid = Payment::where('is_void',false)->where('booking_id', $booking->id)->sum('amount');
+                            $totalPaid = Payment::where('is_void', false)
+                                ->where('booking_id', $booking->id)
+                                ->sum('amount');
+
                             $remaining = $booking->total_amount - $totalPaid;
-                            if ($value > $remaining) {
-                                $fail("Payment amount exceeds remaining balance of " . number_format($remaining,2));
+
+                            // allow exact full payment
+                            if ($value > $remaining && round($remaining, 2) > 0) {
+                                $fail("Payment amount exceeds remaining balance of " . number_format($remaining, 2));
                             }
                         }
                     }
