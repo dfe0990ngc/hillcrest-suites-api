@@ -36,14 +36,10 @@ Route::middleware(['auth:sanctum','verified'])->group(function(){
         Route::put('rooms/{id}',[RoomController::class,'update'])->name('api.admin.rooms.update');
         Route::put('rooms/{id}/update-image',[RoomController::class,'updateImageUrl'])->name('api.admin.rooms.updateImageUrl');
         Route::delete('rooms/{id}',[RoomController::class,'destroy'])->name('api.admin.rooms.destroy');
-        // Route::post('rooms/{id}/upload-image',[RoomController::class,'uploadImage'])->name('api.admin.rooms.uploadImage');
 
         // Bookings
         Route::get('bookings',[BookingController::class,'index'])->name('api.admin.bookings');
-        // Route::post('bookings',[RoomController::class,'store'])->name('api.admin.bookings.store');
         Route::put('bookings/{id}',[BookingController::class,'update'])->name('api.admin.bookings.update');
-        // Route::put('bookings/{id}/update-image',[RoomController::class,'updateImageUrl'])->name('api.admin.bookings.updateImageUrl');
-        // Route::delete('bookings/{id}',[RoomController::class,'destroy'])->name('api.admin.bookings.destroy');
 
         // Users
         Route::get('users',[UserController::class,'index'])->name('api.admin.users');
@@ -65,22 +61,8 @@ Route::middleware(['auth:sanctum','verified'])->group(function(){
         Route::get('/payment-analytics', [PaymentController::class, 'analytics'])->name('api.admin.payments.analytics');
     });
 
-    // Route::prefix('guest')->group(function () {
-    //     Route::get('rooms', [GuestRoomController::class, 'index']);
-    //     Route::get('rooms/available', [GuestRoomController::class, 'getAvailableRooms']);
-    //     Route::get('rooms/check-availability', [GuestRoomController::class, 'checkAvailability']);
-    //     Route::get('rooms/{room}/availability-calendar', [GuestRoomController::class, 'getAvailabilityCalendar']);
-    //     Route::get('rooms/availability-summary', [GuestRoomController::class, 'getAvailabilitySummary']);
-    //     Route::get('rooms/similar', [GuestRoomController::class, 'getSimilarRooms']);
-        
-    //     Route::post('bookings', [GuestBookingController::class, 'store']);
-    //     Route::post('bookings/validate', [GuestBookingController::class, 'validateBooking']);
-    // });
-
     Route::prefix('guest')->group(function(){
-        // Route::get('rooms',[RoomController::class,'gIndex'])->name('api.guest.rooms');
         Route::get('bookings',[BookingController::class,'gIndex'])->name('api.guest.bookings');
-        // Route::post('bookings',[BookingController::class,'store'])->name('api.guest.bookings.store');
 
         Route::get('rooms', [RoomController::class, 'gIndex']);
         Route::get('rooms/available', [GuestRoomController::class, 'getAvailableRooms']);
