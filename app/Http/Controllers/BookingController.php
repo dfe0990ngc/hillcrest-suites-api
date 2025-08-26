@@ -209,7 +209,7 @@ class BookingController extends Controller
         // Send cancellation notification
         try {
             $settings = Setting::first();
-            if ($settings && $settings->notify_booking_cancellation) {
+            if ($settings && $settings->notify_booking_cancellation) {        
                 $booking->user->notify(new BookingCancelled($booking));
             }
         } catch (Exception $e) {

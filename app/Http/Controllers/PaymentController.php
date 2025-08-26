@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\PartialPayment;
 use App\Notifications\PaymentConfirmed;
@@ -132,10 +133,22 @@ class PaymentController extends Controller
 
             if ($totalPayments >= ($booking->total_amount)) {
                 $booking->update(['payment_status' => 'paid']);
-                $payment->user->notify(new PaymentConfirmed($payment));
+                try{
+                    $payment->user->notify(new PaymentConfirmed($payment));
+                }catch(\Exception $ei){
+                    Log::debug('Sending PaymentConfirmation Error',[$ei->getMessage()]);
+                }
             }else{
                 $payment->total_amount_paid = $totalPayments;
-                $payment->user->notify(new PartialPayment($payment));
+                try{
+                    $payment->user->notify(new PartialPayment($payment));
+                }catch(\Exception $ei){
+                    Log::debug('Sending Partial Payment Confirmation Error',[$ei->getMessage()]);
+                }
+            }
+
+            if($booking->status == 'pending'){
+                $booking->update(['status' => 'confirmed']);
             }
 
             return response()->json([
