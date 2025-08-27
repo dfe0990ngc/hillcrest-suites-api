@@ -155,12 +155,20 @@ class HotelAnalyticsService
     /**
      * Get total revenue from paid bookings
      */
-    private function getTotalRevenue($startDate, $endDate)
+    private function getTotalRevenue($startDate, $endDate, $roomType = null)
     {
+        if($roomType == null){
+            return Payment::where('is_void',false)->whereHas('booking', function($q) use($startDate, $endDate){
+                $q->whereBetween('created_at', [$startDate, $endDate])->whereNotIn('status', ['cancelled','pending']);
+            })->sum('amount') ?: 0;
+        }
 
-        return Payment::where('is_void',false)->whereHas('booking', function($q) use($startDate, $endDate){
-            $q->whereBetween('created_at', [$startDate, $endDate])->whereNotIn('status', ['cancelled','pending']);
-        })->sum('amount') ?: 0;
+        return Payment::where('is_void',false)->whereHas('booking', function($q) use($startDate, $endDate, $roomType){
+                $q->whereBetween('created_at', [$startDate, $endDate])->whereNotIn('status', ['cancelled','pending'])
+                ->whereHas('room', function($q) use($roomType){
+                    $q->where('type', $roomType);
+                });
+            })->sum('amount') ?: 0;
 
     }
 
@@ -280,7 +288,7 @@ class HotelAnalyticsService
                 ->select('bookings.*');
 
             $count = $bookings->count();
-            $revenue = $this->getTotalRevenue($startDate,$endDate);
+            $revenue = $this->getTotalRevenue($startDate,$endDate, $type);
 
             $percentage = $totalRevenue > 0 ? round(($revenue / $totalRevenue) * 100, 1) : 0;
 
