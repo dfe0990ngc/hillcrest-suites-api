@@ -49,9 +49,11 @@ class StorePaymentRequest extends FormRequest
                                 ->sum('amount');
 
                             $remaining = $booking->total_amount - $totalPaid;
+                            if($remaining < 0){
+                                $remaining = 0;
+                            }
 
-                            // allow exact full payment
-                            if ($value > $remaining && round($remaining, 2) > 0) {
+                            if($booking->total_amount <= $totalPaid && $value > $remaining){
                                 $fail("Payment amount exceeds remaining balance of " . number_format($remaining, 2));
                             }
                         }
