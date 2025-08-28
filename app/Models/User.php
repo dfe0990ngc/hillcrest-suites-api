@@ -4,14 +4,15 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use App\Models\Booking;
 use App\Models\Payment;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -77,10 +78,15 @@ class User extends Authenticatable implements MustVerifyEmail
         
         if (!isset($stats)) {
             $stats = $this->bookings()
+                ->leftJoin('payments', 'payments.booking_id', '=', 'bookings.id')
                 ->selectRaw('
-                    COUNT(*) as total_bookings,
-                    SUM(CASE WHEN status IN ("confirmed", "checked_out") THEN total_amount ELSE 0 END) as total_spent,
-                    SUM(CASE WHEN status IN ("confirmed", "checked_out") THEN DATEDIFF(check_out, check_in) ELSE 0 END) as total_nights
+                    COUNT(DISTINCT bookings.id) as total_bookings,
+                    COALESCE(SUM(payments.amount), 0) as total_spent,
+                    SUM(CASE 
+                            WHEN bookings.status IN ("confirmed","checked_in","checked_out") 
+                            THEN DATEDIFF(bookings.check_out, bookings.check_in) 
+                            ELSE 0 
+                        END) as total_nights
                 ')
                 ->first();
         }
@@ -147,7 +153,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function pendingPayments(): HasMany
     {
-        return $this->hasMany(Payment::class)->where('status', Payment::STATUS_PENDING);
+        return $this->hasMany(Payment::class)->whereHas('booking', function($q){
+            $q->where('payment_status',Payment::STATUS_PENDING);
+        });
     }
 
     /**
@@ -171,19 +179,26 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getPaymentStats()
     {
-        $stats = $this->payments()->where('is_void',false)
+        $stats = $this->payments()
+            ->where('is_void', false)
             ->selectRaw('
                 COUNT(*) as total_payments,
                 SUM(CASE WHEN status = "completed" THEN amount ELSE 0 END) as total_paid,
-                SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as total_pending,
-                AVG(CASE WHEN status = "completed" THEN amount ELSE NULL END) as avg_payment_amount
+                AVG(CASE WHEN status = "completed" THEN amount END) as avg_payment_amount
             ')
             ->first();
+
+        // If you want pending from bookings, do it separately
+        $totalBookingsPending = $this->bookings()
+            ->where('payment_status', 'pending')
+            ->sum('total_amount');
+
+        $totalPending = $totalBookingsPending - ($stats->total_paid ?? 0);
 
         return [
             'total_payments' => (int) ($stats->total_payments ?? 0),
             'total_paid' => (float) ($stats->total_paid ?? 0),
-            'total_pending' => (float) ($stats->total_pending ?? 0),
+            'total_pending' => (float) max($totalPending, 0), // prevent negative
             'avg_payment_amount' => (float) ($stats->avg_payment_amount ?? 0),
         ];
     }
