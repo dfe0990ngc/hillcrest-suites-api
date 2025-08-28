@@ -46,7 +46,7 @@ Site URL: https://api-helcris.pcds.edu.ph/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/hillcrest-suites-api.git
+   git clone https://github.com/dfe0990ngc/hillcrest-suites-api.git
    cd hillcrest-suites-api
    ```
 
